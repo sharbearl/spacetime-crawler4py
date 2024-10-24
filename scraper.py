@@ -21,7 +21,12 @@ def extract_next_links(url, resp):
         return list()
     content = BeautifulSoup(resp.raw_response.content, "lxml")
     atags = content.select('a')
-    ret = [atag['href'] for atag in atags if is_valid(atag['href'])]
+    # ret = [atag['href'] for atag in atags if is_valid(atag['href'])]
+    # I wanna use a list comprehension so bad but I shouldn't
+    ret = []
+    for atag in atags:
+        if 'href' in atag and is_valid(atag['href']):
+            ret.append(atag)
     return ret
 
 def is_valid(url):
