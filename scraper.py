@@ -20,13 +20,12 @@ def extract_next_links(url, resp):
         print(resp.error)
         return list()
     content = BeautifulSoup(resp.raw_response.content, "lxml")
-    atags = content.select('a')
-    # ret = [atag['href'] for atag in atags if is_valid(atag['href'])]
+    atags = content.select('a[href]')
     # I wanna use a list comprehension so bad but I shouldn't
     ret = []
     for atag in atags:
-        if 'href' in atag and is_valid(atag['href']):
-            ret.append(atag)
+        if is_valid(atag['href']):
+            ret.append(atag['href'])
     return ret
 
 def is_valid(url):
@@ -37,7 +36,7 @@ def is_valid(url):
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
-        return not re.match(
+        regMatch = not re.match(
             r".*\.(css|js|bmp|gif|jpe?g|ico"
             + r"|png|tiff?|mid|mp2|mp3|mp4"
             + r"|wav|avi|mov|mpeg|ram|m4v|mkv|ogg|ogv|pdf"
@@ -46,6 +45,14 @@ def is_valid(url):
             + r"|epub|dll|cnf|tgz|sha1"
             + r"|thmx|mso|arff|rtf|jar|csv"
             + r"|rm|smil|wmv|swf|wma|zip|rar|gz)$", parsed.path.lower())
+        if not regMatch:
+            return False
+        validPaths = set(["ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu", "today.uci.edu/department/information_computer_sciences"])
+        for path in validPaths:
+            if parsed.hostname.lower() not in validPaths:
+                return False
+        return True
+        
 
     except TypeError:
         print ("TypeError for ", parsed)
