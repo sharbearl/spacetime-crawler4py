@@ -48,12 +48,14 @@ def is_valid(url):
         if not regMatch:
             return False
         validPaths = set(["ics.uci.edu", "cs.uci.edu", "informatics.uci.edu", "stat.uci.edu", "today.uci.edu/department/information_computer_sciences"])
-        bannedQueries = set(["eventDisplay=day&eventDate=2024"])
+        # bannedQueries = set(["eventDisplay=day&eventDate=2024"])
+        datePattern = r"\b\d{4}-\d{2}\b"
+        matchQuery = re.search(datePattern, parsed.query)
+        matchPath = re.search(datePattern, parsed.path)
+        if matchQuery or matchPath:
+            return False
         for path in validPaths:
             if parsed.hostname.lower() not in validPaths:
-                return False
-        for bannedQuery in bannedQueries:
-            if bannedQuery in parsed.query:
                 return False
         return True
         
