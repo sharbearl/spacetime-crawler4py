@@ -19,6 +19,9 @@ def extract_next_links(url, resp):
     if resp.status != 200:
         print(resp.error)
         return list()
+    if len(resp.raw_response.content) <= 500:
+        print("Low information page:", url)
+        return list()
     content = BeautifulSoup(resp.raw_response.content, "lxml")
     atags = content.select('a[href]')
     # I wanna use a list comprehension so bad but I shouldn't
@@ -54,10 +57,17 @@ def is_valid(url):
         matchPath = re.search(datePattern, parsed.path)
         if matchQuery or matchPath:
             return False
+        if "filter" in parsed.query or "ical" in parsed.query or "download" in parsed.query or "login" in parsed.query:
+            return False
+        if "/uploads" in parsed.path:
+            return False
+        if len(parsed.fragment) > 0:
+            return False
         for path in validPaths:
-            if parsed.hostname.lower() not in validPaths:
-                return False
-        return True
+            if path in parsed.hostname.lower():
+            # if parsed.hostname.lower() not in validPaths:
+                return True
+        return False
         
 
     except TypeError:
