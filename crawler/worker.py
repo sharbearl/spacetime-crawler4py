@@ -6,6 +6,10 @@ from utils import get_logger
 import scraper
 import time
 
+# from tokenizer import TokenCounter
+
+# from ..tokenizer import TokenCounter
+
 
 class Worker(Thread):
     def __init__(self, worker_id, config, frontier):

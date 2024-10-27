@@ -22,17 +22,15 @@ def extract_next_links(url, resp):
     content = BeautifulSoup(resp.raw_response.content, "lxml")
     atags = content.select('a[href]')
     # I wanna use a list comprehension so bad but I shouldn't
-    ret = []
-    for atag in atags:
-        if is_valid(atag['href']):
-            ret.append(atag['href'])
-    return ret
+    return [atag for atag in atags]
+
 
 def is_valid(url):
     # Decide whether to crawl this url or not. 
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
+        print("is_valid URL IS:",url)
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
@@ -54,10 +52,47 @@ def is_valid(url):
         matchPath = re.search(datePattern, parsed.path)
         if matchQuery or matchPath:
             return False
+        if "filter" in parsed.query or "ical" in parsed.query or "download" in parsed.query or "login" in parsed.query:
+            return False
+        if "/uploads" in parsed.path:
+            return False
+        if len(parsed.fragment) > 0:
+            return False
         for path in validPaths:
-            if parsed.hostname.lower() not in validPaths:
+            if ("." + path) in parsed.hostname.lower():
+                return True
+            if ("/" + path ) in parsed.hostname.lower():
+                return True
+        # obeying informatics robots.txt
+        if "informatics.uci.edu" in parsed.hostname.lower():
+            allowedDomains = {
+                "/wp-admin/admin-ajax.php",
+                "/research/labs-centers/",
+                "/research/areas-of-expertise/",
+                "/research/example-research-projects/",
+                "/research/phd-research/",
+                "/research/past-dissertations/",
+                "/research/masters-research/",
+                "/research/undergraduate-research/",
+                "/research/gifts-grants/"
+            }
+            for allowedDomain in allowedDomains:
+                if parsed.path.beginswith(allowedDomain):
+                    return True
+            if parsed.path.beginswith('/wp-admin') or parsed.path.beginswith('/research'):
                 return False
-        return True
+        # nothing specificed for:
+        # ics.uci.edu
+        # cs.uci.edu
+        # obeying robots.txt for stat.uci.edu
+        if 'stat.uci.edu' in parsed.hostname:
+            if parsed.path.beginswith("/web-admin/admin-ajax.php"):
+                return True
+            return not parsed.path.beginswith("/wp-admin")
+        if 'today.uci.edu' in parsed.hostname:
+            return parsed.path.beginswith("/iseb")
+
+        return False
         
 
     except TypeError:
