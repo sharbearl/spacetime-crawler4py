@@ -89,20 +89,20 @@ def is_valid(url):
                 "/research/gifts-grants/"
             }
             for allowedDomain in allowedDomains:
-                if parsed.path.beginswith(allowedDomain):
+                if parsed.path.startswith(allowedDomain):
                     return True
-            if parsed.path.beginswith('/wp-admin') or parsed.path.beginswith('/research'):
+            if parsed.path.startswith('/wp-admin') or parsed.path.startswith('/research'):
                 return False
         # nothing specificed for:
         # ics.uci.edu
         # cs.uci.edu
         # obeying robots.txt for stat.uci.edu
         if 'stat.uci.edu' in parsed.hostname:
-            if parsed.path.beginswith("/web-admin/admin-ajax.php"):
+            if parsed.path.startswith("/web-admin/admin-ajax.php"):
                 return True
-            return not parsed.path.beginswith("/wp-admin")
+            return not parsed.path.startswith("/wp-admin")
         if 'today.uci.edu' in parsed.hostname:
-            return parsed.path.beginswith("/iseb")
+            return parsed.path.startswith("/iseb")
 
         return False
         
