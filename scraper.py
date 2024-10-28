@@ -6,6 +6,16 @@ def scraper(url, resp):
     links = extract_next_links(url, resp)
     return [link for link in links if is_valid(link)]
 
+def get_word_count(url, resp):
+    # same kinda thing going on
+    if resp.status != 200:
+        return 0
+    content = BeautifulSoup(resp.raw_response.content, "lxml")
+    if is_valid(url):
+        return len(content.getText().split())
+    return 0
+
+
 def extract_next_links(url, resp):
     # Implementation required.
     # url: the URL that was used to get the page
@@ -19,10 +29,11 @@ def extract_next_links(url, resp):
     if resp.status != 200:
         print("Status code:", resp.status,"| Error Message:", resp.error)
         return list()
-    if len(resp.raw_response.content) <= 500:
+    content = BeautifulSoup(resp.raw_response.content, "lxml")
+    # New specification!
+    if len(content.getText().split()) <= 200:
         print("Low information page:", url)
         return list()
-    content = BeautifulSoup(resp.raw_response.content, "lxml")
     atags = content.select('a[href]')
     # I wanna use a list comprehension so bad but I shouldn't
     return [atag['href'] for atag in atags]
@@ -63,7 +74,7 @@ def is_valid(url):
             return False
         if len(parsed.fragment) > 0:
             return False
-        if parsed.hostname == "":
+        if parsed.hostname == "" or parsed.hostname == None:
             return False
         isValidPath = False
         for path in validPaths:
@@ -93,16 +104,19 @@ def is_valid(url):
                     return True
             if parsed.path.startswith('/wp-admin') or parsed.path.startswith('/research'):
                 return False
+            return True # other pages should be fine?
         # nothing specificed for:
         # ics.uci.edu
         # cs.uci.edu
+        if 'ics.uci.edu' in parsed.hostname or 'cs.uci.edu' in parsed.hostname:
+            return True
         # obeying robots.txt for stat.uci.edu
         if 'stat.uci.edu' in parsed.hostname:
             if parsed.path.startswith("/web-admin/admin-ajax.php"):
                 return True
             return not parsed.path.startswith("/wp-admin")
         if 'today.uci.edu' in parsed.hostname:
-            return parsed.path.startswith("/iseb")
+            return not parsed.path.startswith("/iseb")
 
         return False
         
