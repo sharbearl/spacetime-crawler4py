@@ -17,7 +17,7 @@ def extract_next_links(url, resp):
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
     if resp.status != 200:
-        print(resp.error)
+        print("Status code:", resp.status,"| Error Message:", resp.error)
         return list()
     if len(resp.raw_response.content) <= 500:
         print("Low information page:", url)
@@ -27,8 +27,7 @@ def extract_next_links(url, resp):
     # I wanna use a list comprehension so bad but I shouldn't
     ret = []
     for atag in atags:
-        if is_valid(atag['href']):
-            ret.append(atag['href'])
+        ret.append(atag['href'])
     return ret
 
 def is_valid(url):
@@ -59,13 +58,16 @@ def is_valid(url):
             return False
         if "filter" in parsed.query or "ical" in parsed.query or "download" in parsed.query or "login" in parsed.query:
             return False
+        if "share=" in parsed.query:
+            return False
         if "/uploads" in parsed.path:
             return False
         if len(parsed.fragment) > 0:
             return False
+        if parsed.hostname == "":
+            return False
         for path in validPaths:
-            if path in parsed.hostname.lower():
-            # if parsed.hostname.lower() not in validPaths:
+            if ("." + path) in parsed.hostname.lower() or ("/" + path) in parsed.hostname.lower():
                 return True
         return False
         
