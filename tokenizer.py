@@ -36,6 +36,10 @@ class TokenCounter:
         for word, freq in words._counts.items():
             self.addToken(word, freq)
 
+    def addTokensFromDict(self, words):
+        for word, freq in words.items():
+            self.addToken(word, freq)
+
     # Time complexity: O(1)
     # Explanation: Searching for and removing
     # an item in a python dict takes O(1) time

@@ -1,4 +1,5 @@
 import re
+from tokenizer import TokenCounter
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
@@ -14,6 +15,17 @@ def get_word_count(url, resp):
     if is_valid(url):
         return len(content.getText().split())
     return 0
+
+def get_word_frequencies(url, resp):
+    if resp.status != 200:
+        return TokenCounter()
+    content = BeautifulSoup(resp.raw_response.content, "lxml")
+    if is_valid(url):
+        ret = TokenCounter()
+        ret.addTokensFromList([word.lower() for word in content.getText().split()])
+        return ret
+        
+    return TokenCounter()
 
 
 def extract_next_links(url, resp):
