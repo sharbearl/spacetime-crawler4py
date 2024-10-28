@@ -58,11 +58,16 @@ def is_valid(url):
             return False
         if len(parsed.fragment) > 0:
             return False
+        isValidPath = False
         for path in validPaths:
             if ("." + path) in parsed.hostname.lower():
-                return True
+                isValidPath = True
+                break
             if ("/" + path ) in parsed.hostname.lower():
-                return True
+                isValidPath = True
+                break
+        if not isValidPath:
+            return False
         # obeying informatics robots.txt
         if "informatics.uci.edu" in parsed.hostname.lower():
             allowedDomains = {
