@@ -22,7 +22,7 @@ def extract_next_links(url, resp):
     content = BeautifulSoup(resp.raw_response.content, "lxml")
     atags = content.select('a[href]')
     # I wanna use a list comprehension so bad but I shouldn't
-    return [atag for atag in atags]
+    return [atag['href'] for atag in atags]
 
 
 def is_valid(url):
@@ -30,7 +30,7 @@ def is_valid(url):
     # If you decide to crawl it, return True; otherwise return False.
     # There are already some conditions that return False.
     try:
-        print("is_valid URL IS:",url)
+        # print("is_valid URL IS:",url)
         parsed = urlparse(url)
         if parsed.scheme not in set(["http", "https"]):
             return False
