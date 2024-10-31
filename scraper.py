@@ -1,5 +1,5 @@
 import re
-from tokenizer import TokenCounter
+from tokenizer import TokenCounter, tokenize
 from urllib.parse import urlparse
 from bs4 import BeautifulSoup
 
@@ -22,7 +22,8 @@ def get_word_frequencies(url, resp):
     content = BeautifulSoup(resp.raw_response.content, "lxml")
     if is_valid(url):
         ret = TokenCounter()
-        ret.addTokensFromList([word.lower() for word in content.getText().split()])
+        
+        ret.addTokensFromList(tokenize(content.getText()))
         return ret
         
     return TokenCounter()

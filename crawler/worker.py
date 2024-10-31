@@ -22,7 +22,6 @@ class Worker(Thread):
         super().__init__(daemon=True)
         
     def run(self):
-        """
         try: 
             with open("word_frequencies.json", "r") as f:
                 total_word_frequencies = TokenCounter()
@@ -30,7 +29,6 @@ class Worker(Thread):
         except FileNotFoundError:
             with open("word_frequencies.json", "w") as f:
                 total_word_frequencies = TokenCounter()
-        """
         while True:
             tbd_url = self.frontier.get_tbd_url()
             if not tbd_url:
@@ -42,16 +40,12 @@ class Worker(Thread):
                 f"using cache {self.config.cache_server}.")
             scraped_urls = scraper.scraper(tbd_url, resp)
             word_count = scraper.get_word_count(tbd_url, resp)
-            """
             word_frequencies = scraper.get_word_frequencies(tbd_url, resp)
             total_word_frequencies.addTokensFromTokenCounter(word_frequencies)
-            """
             with open("word_counts.txt", "a") as f:
                 f.write(f"{word_count}: {tbd_url}\n")
-            """ 
-            with open("word_frequencies.json", "r") as f:
-                f.dump(total_word_frequencies._counts)
-            """   
+            with open("word_frequencies.json", "w") as f:
+                json.dump(total_word_frequencies._counts, f) 
             for scraped_url in scraped_urls:
                 self.frontier.add_url(scraped_url)
             self.frontier.mark_url_complete(tbd_url)
