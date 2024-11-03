@@ -12,7 +12,7 @@ def get_word_count(url, resp):
     if resp.status != 200:
         return 0
     content = BeautifulSoup(resp.raw_response.content, "lxml")
-    if is_valid(url):
+    if is_valid(url) and is_worth_scraping(url, resp):
         return len(content.getText().split())
     return 0
 
@@ -20,14 +20,24 @@ def get_word_frequencies(url, resp):
     if resp.status != 200:
         return TokenCounter()
     content = BeautifulSoup(resp.raw_response.content, "lxml")
-    if is_valid(url):
+    if is_valid(url) and is_worth_scraping(url, resp):
         ret = TokenCounter()
-        
         ret.addTokensFromList(tokenize(content.getText()))
         return ret
         
     return TokenCounter()
 
+
+def is_worth_scraping(url, resp):
+    if resp.status != 200:
+        print("Status code:", resp.status,"| Error Message:", resp.error)
+        return False
+    content = BeautifulSoup(resp.raw_response.content, "lxml")
+    # New specification!
+    if len(content.getText().split()) <= 200:
+        print("Low information page:", url)
+        return False
+    return True
 
 def extract_next_links(url, resp):
     # Implementation required.
@@ -39,16 +49,12 @@ def extract_next_links(url, resp):
     #         resp.raw_response.url: the url, again
     #         resp.raw_response.content: the content of the page!
     # Return a list with the hyperlinks (as strings) scrapped from resp.raw_response.content
-    if resp.status != 200:
-        print("Status code:", resp.status,"| Error Message:", resp.error)
+    if not is_worth_scraping(url, resp):
         return list()
     content = BeautifulSoup(resp.raw_response.content, "lxml")
-    # New specification!
-    if len(content.getText().split()) <= 200:
-        print("Low information page:", url)
-        return list()
     atags = content.select('a[href]')
     # I wanna use a list comprehension so bad but I shouldn't
+    # (I did it anyway)
     return [atag['href'] for atag in atags]
 
 
